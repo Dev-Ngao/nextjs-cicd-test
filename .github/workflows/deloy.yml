@@ -8,11 +8,6 @@ on:
         required: true
         type: string
         default: 'Manual deployment'
-      build:
-        description: 'Build the application'
-        required: true
-        type: boolean
-        default: true
       use_npm_ci:
         description: 'Run npm ci (clean install)'
         required: true
@@ -22,7 +17,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    name: Deploy - ${{ github.event.inputs.name || 'Production' }}
+    outputs:
+      run-name: ${{ steps.set-run-name.outputs.run-name }}
     steps:
+      - name: Set run name
+        id: set-run-name
+        run: |
+          echo "run-name=Deploy - ${{ github.event.inputs.name || 'Production' }}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -35,17 +37,8 @@ jobs:
           script: |
             cd /root/nextjs-cicd-test            
             echo "Starting deployment: ${{ github.event.inputs.name }}"
-            
-            if ${{ github.event.inputs.build == 'true' }}; then
-              if ${{ github.event.inputs.use_npm_ci == 'true' }}; then
-                echo "Running npm ci..."
+            if ${{ github.event.inputs.use_npm_ci == 'true' }};
                 npm ci
-              fi
-              echo "Building application..."
-              npm run build
-              echo "Restarting PM2 process..."
-              /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
-              echo "Deployment '${{ github.event.inputs.name }}' completed successfully!"
-            else
-              echo "Skipping build as per workflow input"
             fi
+            npm run build
+            /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
