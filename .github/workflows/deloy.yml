@@ -18,6 +18,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /root/nextjs-cicd-test
-            npm install --production
+            npm i
             npm run build
             pm2 restart nextjs-cicd
