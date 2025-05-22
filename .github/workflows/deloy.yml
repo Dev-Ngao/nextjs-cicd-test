@@ -20,4 +20,4 @@ jobs:
             cd /root/nextjs-cicd-test
             npm ci
             npm run build
-            pm2 restart nextjs-cicd
+            /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
