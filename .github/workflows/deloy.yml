@@ -3,6 +3,11 @@ name: 🚀 Deploy Next.js App
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
       use_npm_ci:
         description: 'Run npm ci (clean install)'
         required: true
@@ -24,6 +29,10 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /root/nextjs-cicd-test
+            echo "Deploying branch: ${{ github.event.inputs.branch }}"
+            git fetch origin
+            git checkout ${{ github.event.inputs.branch }}
+            git pull origin ${{ github.event.inputs.branch }}
             echo "Starting deployment"
             if [ "${{ github.event.inputs.use_npm_ci }}" = "true" ]; then
                 echo "Running npm ci..."
