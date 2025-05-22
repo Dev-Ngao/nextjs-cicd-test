@@ -3,6 +3,11 @@ name: Deploy to Ubuntu Server
 on:
   workflow_dispatch:
     inputs:
+      name:
+        description: 'Deployment name/description'
+        required: true
+        type: string
+        default: 'Manual deployment'
       build:
         description: 'Build the application'
         required: true
@@ -29,12 +34,18 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /root/nextjs-cicd-test            
+            echo "Starting deployment: ${{ github.event.inputs.name }}"
+            
             if ${{ github.event.inputs.build == 'true' }}; then
               if ${{ github.event.inputs.use_npm_ci == 'true' }}; then
+                echo "Running npm ci..."
                 npm ci
               fi
+              echo "Building application..."
               npm run build
+              echo "Restarting PM2 process..."
               /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
+              echo "Deployment '${{ github.event.inputs.name }}' completed successfully!"
             else
               echo "Skipping build as per workflow input"
             fi
