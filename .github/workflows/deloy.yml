@@ -44,10 +44,14 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /root/nextjs-cicd-test            
+            cd /root/nextjs-cicd-test
             echo "Starting deployment: ${{ github.event.inputs.name }}"
-            if ${{ github.event.inputs.use_npm_ci == 'true' }};
-                npm ci;
+            if [ "${{ github.event.inputs.use_npm_ci }}" = "true" ]; then
+                echo "Running npm ci..."
+                npm ci
             fi
-            npm run build;
+            echo "Building application..."
+            npm run build
+            echo "Restarting PM2 process..."
             /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
+            echo "✅ Deployment completed successfully!"
