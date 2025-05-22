@@ -1,15 +1,26 @@
 name: Deploy to Ubuntu Server
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build:
+        description: 'Build the application'
+        required: true
+        type: boolean
+        default: true
+      use_npm_ci:
+        description: 'Run npm ci (clean install)'
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -17,8 +28,13 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /root/nextjs-cicd-test
-            git pull
-            npm ci
-            npm run build
-            /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
+            cd /root/nextjs-cicd-test            
+            if ${{ github.event.inputs.build == 'true' }}; then
+              if ${{ github.event.inputs.use_npm_ci == 'true' }}; then
+                npm ci
+              fi
+              npm run build
+              /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
+            else
+              echo "Skipping build as per workflow input"
+            fi
