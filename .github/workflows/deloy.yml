@@ -1,13 +1,21 @@
-name: Deploy to Ubuntu Server
+name: 🚀 Deploy Next.js App
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        default: 'production'
+        options:
+          - production
+          - staging
       name:
-        description: 'Deployment name/description'
+        description: 'Deployment name/version (e.g., v1.2.0, hotfix-login)'
         required: true
         type: string
-        default: 'Manual deployment'
+        default: 'manual-deploy'
       use_npm_ci:
         description: 'Run npm ci (clean install)'
         required: true
@@ -17,14 +25,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy - ${{ github.event.inputs.name || 'Production' }}
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }} - ${{ github.event.inputs.name }}
+    environment: ${{ github.event.inputs.environment || 'production' }}
     outputs:
       run-name: ${{ steps.set-run-name.outputs.run-name }}
     steps:
       - name: Set run name
         id: set-run-name
         run: |
-          echo "run-name=Deploy - ${{ github.event.inputs.name || 'Production' }}" >> $GITHUB_OUTPUT
+          echo "run-name=🚀 Deploy to ${{ github.event.inputs.environment || 'production' }} - ${{ github.event.inputs.name }}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -38,7 +47,7 @@ jobs:
             cd /root/nextjs-cicd-test            
             echo "Starting deployment: ${{ github.event.inputs.name }}"
             if ${{ github.event.inputs.use_npm_ci == 'true' }};
-                npm ci
+                npm ci;
             fi
-            npm run build
+            npm run build;
             /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
