@@ -18,6 +18,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /root/nextjs-cicd-test
+            git pull
             npm ci
             npm run build
             /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
