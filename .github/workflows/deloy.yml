@@ -3,19 +3,6 @@ name: 🚀 Deploy Next.js App
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        type: choice
-        default: 'production'
-        options:
-          - production
-          - staging
-      name:
-        description: 'Deployment name/version (e.g., v1.2.0, hotfix-login)'
-        required: true
-        type: string
-        default: 'manual-deploy'
       use_npm_ci:
         description: 'Run npm ci (clean install)'
         required: true
@@ -25,15 +12,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy to ${{ github.event.inputs.environment || 'production' }} - ${{ github.event.inputs.name }}
-    environment: ${{ github.event.inputs.environment || 'production' }}
-    outputs:
-      run-name: ${{ steps.set-run-name.outputs.run-name }}
     steps:
-      - name: Set run name
-        id: set-run-name
-        run: |
-          echo "run-name=🚀 Deploy to ${{ github.event.inputs.environment || 'production' }} - ${{ github.event.inputs.name }}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -45,7 +24,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /root/nextjs-cicd-test
-            echo "Starting deployment: ${{ github.event.inputs.name }}"
+            echo "Starting deployment"
             if [ "${{ github.event.inputs.use_npm_ci }}" = "true" ]; then
                 echo "Running npm ci..."
                 npm ci
@@ -54,4 +33,4 @@ jobs:
             npm run build
             echo "Restarting PM2 process..."
             /www/server/nodejs/v22.15.1/bin/pm2 restart nextjs-cicd
-            echo "✅ Deployment completed successfully!"
+            echo "Deployment completed successfully!"
